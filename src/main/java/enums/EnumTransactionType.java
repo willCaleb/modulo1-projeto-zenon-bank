@@ -1,4 +1,5 @@
-public enum EnumTransactionType {
+package enums;
 
-    PAYMENT, CACH
+public enum EnumTransactionType {
+    CASH_IN, CASH_OUT, DEBIT, PAYMENT, TRANSFER
 }
