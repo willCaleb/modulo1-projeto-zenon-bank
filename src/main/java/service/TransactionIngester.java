@@ -19,19 +19,20 @@ import java.util.Optional;
 
 public class TransactionIngester {
 
+    private static final Integer BUFFER_ALLOCATION_SIZE = 8192;
+
     public List<Transaction> getTransactionsFromFile(String filename, Integer linesToProcess) {
         List<Transaction> transactions = new ArrayList<>();
         Path path = Paths.get(filename);
 
         try (FileChannel channel = FileChannel.open(path, StandardOpenOption.READ)) {
-            ByteBuffer buffer = ByteBuffer.allocate(8192);
+            ByteBuffer buffer = ByteBuffer.allocate(BUFFER_ALLOCATION_SIZE);
 
             String content = getContent(channel, buffer);
 
             String[] lines = content.split("\n");
 
             return generateTransactionsList(lines, transactions, linesToProcess);
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -84,9 +85,8 @@ public class TransactionIngester {
 
     private BigDecimal convertWithValidation(String strValue, String fieldName) {
         if (strValue == null || strValue.isEmpty()) {
-            throw new IllegalArgumentException("O valor de " + fieldName + " não pode ser vazio");
+            throw new IllegalArgumentException(fieldName + " shoud not be empty");
         }
         return new BigDecimal(strValue);
     }
-
 }
