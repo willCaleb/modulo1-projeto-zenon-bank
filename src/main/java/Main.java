@@ -9,10 +9,11 @@ public class Main {
         TransactionIngester transactionIngester = new TransactionIngester();
 
         long init = System.currentTimeMillis();
-        List<Transaction> transactionsFromFile = transactionIngester.getTransactionsFromFile("data/log.csv");
+        List<Transaction> transactionsFromFile = transactionIngester.getTransactionsFromFile("data/log.csv", 1000);
+        List<Transaction> transactionsFromFileWithErrors = transactionIngester.getTransactionsFromFile("data/paysim_with_bad_data.csv", 16);
 
         for(int i = 0; i < 10; i++) {
-            System.out.println(transactionsFromFile.get(i));
+            System.out.println(transactionsFromFileWithErrors.get(i));
         }
 
         long end = System.currentTimeMillis();
