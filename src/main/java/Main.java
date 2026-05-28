@@ -24,9 +24,13 @@ public class Main {
         fraudAnalyzer.printFraudOrigNamesDistinctLimit5(transactionsFromFile);
         fraudAnalyzer.printTotalLoss(transactionsFromFile);
 
+        printFraudsByType(fraudAnalyzer, transactionsFromFile);
+
+    }
+
+    private static void printFraudsByType(FraudAnalyzer fraudAnalyzer, List<Transaction> transactionsFromFile) {
         System.out.println("Fraudes por tipo:");
         fraudAnalyzer.printFraudsQuantityByType(transactionsFromFile, EnumTransactionType.CASH_OUT);
         fraudAnalyzer.printFraudsQuantityByType(transactionsFromFile, EnumTransactionType.TRANSFER);
-
     }
 }
