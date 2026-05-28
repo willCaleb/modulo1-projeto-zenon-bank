@@ -3,7 +3,6 @@ package service;
 import enums.EnumTransactionType;
 import model.Transaction;
 import model.TransactionCustomer;
-import model.TransactionReceiverCustomer;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -64,17 +63,17 @@ public class TransactionIngester {
             Transaction transaction = new Transaction(
                     Integer.parseInt(values[0]),
                     EnumTransactionType.valueOf(values[1]),
-                    convertWithValidation(values[2], "amount"),
+                    convertStringToBigDecimalWithValidationNotNull(values[2], "amount"),
                     new TransactionCustomer(values[3],
-                            convertWithValidation(values[4], "oldBalanceOrg"),
-                            convertWithValidation(values[5], "newBalanceOrig")
+                            convertStringToBigDecimalWithValidationNotNull(values[4], "oldBalance"),
+                            convertStringToBigDecimalWithValidationNotNull(values[5], "newBalance")
                             ),
-                    new TransactionReceiverCustomer(values[6],
-                            convertWithValidation(values[7], "OldBalanceDest"),
-                            convertWithValidation(values[8], "newBalanceDest")
+                    new TransactionCustomer(values[6],
+                            convertStringToBigDecimalWithValidationNotNull(values[7], "OldBalance"),
+                            convertStringToBigDecimalWithValidationNotNull(values[8], "newBalance")
                     ),
-                    Integer.parseInt(values[9]),
-                    Integer.parseInt(values[10])
+                    values[9].equals("1"),
+                    values[10].equals("1")
             );
             return Optional.of(transaction);
         } catch (Exception e) {
@@ -83,7 +82,7 @@ public class TransactionIngester {
         }
     }
 
-    private BigDecimal convertWithValidation(String strValue, String fieldName) {
+    private BigDecimal convertStringToBigDecimalWithValidationNotNull(String strValue, String fieldName) {
         if (strValue == null || strValue.isEmpty()) {
             throw new IllegalArgumentException(fieldName + " shoud not be empty");
         }
