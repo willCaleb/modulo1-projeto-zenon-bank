@@ -1,36 +1,52 @@
 import enums.EnumTransactionType;
 import model.Transaction;
+import repository.TransactionListRepository;
+import repository.TransactionRepository;
+import repository.TransactionalMapRepository;
 import service.FraudAnalyzer;
 import service.TransactionIngester;
 
-import java.util.List;
+public static void main(String[] args) {
 
-public class Main {
-    public static void main(String[] args){
+    TransactionIngester transactionIngester = new TransactionIngester();
+    TransactionRepository listRepository = new TransactionListRepository();
+    TransactionRepository mapRepository = new TransactionalMapRepository();
 
-        TransactionIngester transactionIngester = new TransactionIngester();
-        FraudAnalyzer fraudAnalyzer = new FraudAnalyzer();
+    List<Transaction> transactionsFromFile = transactionIngester.getTransactionsListFromFile("data/log.csv", 100001);
 
-        List<Transaction> transactionsFromFile = transactionIngester.getTransactionsFromFile("data/log.csv", 50000);
+    String clientName = "C1868032458";
 
-//        List<Transaction> transactionsFromFileWithErrors = transactionIngester.getTransactionsFromFile("data/paysim_with_bad_data.csv", 16);
-//
-//        for (Transaction transactionsFromFileWithError : transactionsFromFileWithErrors) {
-//            System.out.println(transactionsFromFileWithError);
-//        }
+    String notClientName = "C123456";
 
-        fraudAnalyzer.printFraudQuantity(transactionsFromFile);
-        fraudAnalyzer.printMajorFraudsLimit3(transactionsFromFile);
-        fraudAnalyzer.printFraudOrigNamesDistinctLimit5(transactionsFromFile);
-        fraudAnalyzer.printTotalLoss(transactionsFromFile);
+    Optional<Transaction> transactionExistente = listRepository.findByClientName(clientName, 100001);
 
-        printFraudsByType(fraudAnalyzer, transactionsFromFile);
+    long init1 = System.nanoTime();
 
+    printClientByName(transactionExistente, clientName);
+    long end1 = System.nanoTime();
+
+    System.out.println("Tempo de execução lista: " + (end1 - init1));
+
+    Optional<Transaction> optionalTransactionFromMap = mapRepository.findByClientName(clientName, 100001);
+
+    long init2 = System.nanoTime();
+    printClientByName(optionalTransactionFromMap, clientName);
+    long end2 = System.nanoTime();
+
+    System.out.println("Tempo de execução map: " + (end2 - init2));
+
+}
+
+private static void printClientByName(Optional<Transaction> optionalTransaction, String clientName) {
+    if (optionalTransaction.isPresent()) {
+        System.out.println(optionalTransaction);
+        return;
     }
+    System.out.println("Transação não encontrada para o cliente " + clientName);
+}
 
-    private static void printFraudsByType(FraudAnalyzer fraudAnalyzer, List<Transaction> transactionsFromFile) {
-        System.out.println("Fraudes por tipo:");
-        fraudAnalyzer.printFraudsQuantityByType(transactionsFromFile, EnumTransactionType.CASH_OUT);
-        fraudAnalyzer.printFraudsQuantityByType(transactionsFromFile, EnumTransactionType.TRANSFER);
-    }
+private static void printFraudsByType(FraudAnalyzer fraudAnalyzer, List<Transaction> transactionsFromFile) {
+    System.out.println("Fraudes por tipo:");
+    fraudAnalyzer.printFraudsQuantityByType(transactionsFromFile, EnumTransactionType.CASH_OUT);
+    fraudAnalyzer.printFraudsQuantityByType(transactionsFromFile, EnumTransactionType.TRANSFER);
 }

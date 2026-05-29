@@ -12,29 +12,48 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.IntStream;
 
 public class TransactionIngester {
 
     private static final Integer BUFFER_ALLOCATION_SIZE = 8192;
 
-    public List<Transaction> getTransactionsFromFile(String filename, Integer linesToProcess) {
+    public List<Transaction> getTransactionsListFromFile(String filename, Integer linesToProcess) {
         List<Transaction> transactions = new ArrayList<>();
         Path path = Paths.get(filename);
 
         try (FileChannel channel = FileChannel.open(path, StandardOpenOption.READ)) {
-            ByteBuffer buffer = ByteBuffer.allocate(BUFFER_ALLOCATION_SIZE);
-
-            String content = getContent(channel, buffer);
-
-            String[] lines = content.split("\n");
+            String[] lines = getStrings(channel);
 
             return generateTransactionsList(lines, transactions, linesToProcess);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public Map<String, Transaction> getTransactionsMapFromFile(String filename, Integer linesToProcess) {
+
+        Path path = Paths.get(filename);
+
+        try (FileChannel channel = FileChannel.open(path, StandardOpenOption.READ)) {
+            String[] lines = getStrings(channel);
+
+            return generateTransactionsMap(lines, linesToProcess);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+
+    private String[] getStrings(FileChannel channel) throws IOException {
+        ByteBuffer buffer = ByteBuffer.allocate(BUFFER_ALLOCATION_SIZE);
+
+        String content = getContent(channel, buffer);
+
+        String[] lines = content.split("\n");
+        return lines;
     }
 
     private String getContent(FileChannel channel, ByteBuffer buffer) throws IOException {
@@ -57,6 +76,15 @@ public class TransactionIngester {
         return transactions;
     }
 
+    private Map<String, Transaction> generateTransactionsMap(String[] lines, Integer linesToProcess) {
+
+        Map<String, Transaction> transactionMap = new HashMap<>();
+        for(int i = 1; i < linesToProcess; i ++) {
+            Optional<Transaction> optionalTransaction = generateTransaction(lines[i]);
+            optionalTransaction.ifPresent(transaction -> transactionMap.put(transaction.originCustomer().name(), transaction));
+        }
+        return transactionMap;
+    }
     private Optional<Transaction> generateTransaction(String line) {
         String[] values = line.split(",");
         try {
