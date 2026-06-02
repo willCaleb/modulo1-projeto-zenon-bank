@@ -12,13 +12,12 @@ public static void main(String[] args) {
     TransactionRepository listRepository = new TransactionListRepository();
     TransactionRepository mapRepository = new TransactionalMapRepository();
 
-    List<Transaction> transactionsFromFile = transactionIngester.getTransactionsListFromFile("data/log.csv", 100001);
+
+    String[] dataLines = transactionIngester.getStrings("data/log.csv");
 
     String clientName = "C1868032458";
 
-    String notClientName = "C123456";
-
-    Optional<Transaction> transactionExistente = listRepository.findByClientName(clientName, 100001);
+    Optional<Transaction> transactionExistente = listRepository.findByClientName(clientName, dataLines);
 
     long init1 = System.nanoTime();
 
@@ -27,7 +26,7 @@ public static void main(String[] args) {
 
     System.out.println("Tempo de execução lista: " + (end1 - init1));
 
-    Optional<Transaction> optionalTransactionFromMap = mapRepository.findByClientName(clientName, 100001);
+    Optional<Transaction> optionalTransactionFromMap = mapRepository.findByClientName(clientName, dataLines);
 
     long init2 = System.nanoTime();
     printClientByName(optionalTransactionFromMap, clientName);

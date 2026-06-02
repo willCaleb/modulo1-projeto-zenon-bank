@@ -3,6 +3,7 @@ package service;
 import enums.EnumTransactionType;
 import model.Transaction;
 import model.TransactionCustomer;
+import utils.Utils;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -13,47 +14,42 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
-import java.util.stream.IntStream;
 
 public class TransactionIngester {
 
     private static final Integer BUFFER_ALLOCATION_SIZE = 8192;
 
-    public List<Transaction> getTransactionsListFromFile(String filename, Integer linesToProcess) {
+    public List<Transaction> getTransactionsListFromFile(String[] lines){
+        return getTransactionsListFromFile(lines.length, lines);
+    }
+
+    public List<Transaction> getTransactionsListFromFile(Integer linesToProcess, String[] lines) {
         List<Transaction> transactions = new ArrayList<>();
-        Path path = Paths.get(filename);
 
-        try (FileChannel channel = FileChannel.open(path, StandardOpenOption.READ)) {
-            String[] lines = getStrings(channel);
-
-            return generateTransactionsList(lines, transactions, linesToProcess);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return generateTransactionsList(lines, transactions, linesToProcess);
+    }
+    public Map<String, Transaction> getTransactionsMapFromFile( String[]lines){
+        return getTransactionsMapFromFile(lines.length, lines);
     }
 
-    public Map<String, Transaction> getTransactionsMapFromFile(String filename, Integer linesToProcess) {
+    public Map<String, Transaction> getTransactionsMapFromFile( Integer linesToProcess, String[]lines) {
 
-        Path path = Paths.get(filename);
-
-        try (FileChannel channel = FileChannel.open(path, StandardOpenOption.READ)) {
-            String[] lines = getStrings(channel);
-
-            return generateTransactionsMap(lines, linesToProcess);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return generateTransactionsMap(lines, linesToProcess);
     }
 
 
+    public String[] getStrings(String filename) {
+        Path path = Paths.get(filename);
 
-    private String[] getStrings(FileChannel channel) throws IOException {
-        ByteBuffer buffer = ByteBuffer.allocate(BUFFER_ALLOCATION_SIZE);
+        try (FileChannel channel = FileChannel.open(path, StandardOpenOption.READ)) {
+            ByteBuffer buffer = ByteBuffer.allocate(BUFFER_ALLOCATION_SIZE);
 
-        String content = getContent(channel, buffer);
+            String content = getContent(channel, buffer);
 
-        String[] lines = content.split("\n");
-        return lines;
+            return content.split("\n");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private String getContent(FileChannel channel, ByteBuffer buffer) throws IOException {
@@ -68,7 +64,7 @@ public class TransactionIngester {
     }
 
     private List<Transaction> generateTransactionsList(String[] lines, List<Transaction> transactions, Integer linesToProcess) {
-        for (int i = 1; i < linesToProcess; i++) {
+        for (int i = 1; i <= linesToProcess; i++) {
 
             Optional<Transaction> optionalTransaction = generateTransaction(lines[i]);
             optionalTransaction.ifPresent(transactions::add);
@@ -79,26 +75,27 @@ public class TransactionIngester {
     private Map<String, Transaction> generateTransactionsMap(String[] lines, Integer linesToProcess) {
 
         Map<String, Transaction> transactionMap = new HashMap<>();
-        for(int i = 1; i < linesToProcess; i ++) {
+        for (int i = 1; i <= linesToProcess; i++) {
             Optional<Transaction> optionalTransaction = generateTransaction(lines[i]);
             optionalTransaction.ifPresent(transaction -> transactionMap.put(transaction.originCustomer().name(), transaction));
         }
         return transactionMap;
     }
+
     private Optional<Transaction> generateTransaction(String line) {
         String[] values = line.split(",");
         try {
             Transaction transaction = new Transaction(
                     Integer.parseInt(values[0]),
                     EnumTransactionType.valueOf(values[1]),
-                    convertStringToBigDecimalWithValidationNotNull(values[2], "amount"),
+                    Utils.convertStringToBigDecimalWithValidationNotNull(values[2], "amount"),
                     new TransactionCustomer(values[3],
-                            convertStringToBigDecimalWithValidationNotNull(values[4], "oldBalance"),
-                            convertStringToBigDecimalWithValidationNotNull(values[5], "newBalance")
-                            ),
+                            Utils.convertStringToBigDecimalWithValidationNotNull(values[4], "oldBalance"),
+                            Utils.convertStringToBigDecimalWithValidationNotNull(values[5], "newBalance")
+                    ),
                     new TransactionCustomer(values[6],
-                            convertStringToBigDecimalWithValidationNotNull(values[7], "OldBalance"),
-                            convertStringToBigDecimalWithValidationNotNull(values[8], "newBalance")
+                            Utils.convertStringToBigDecimalWithValidationNotNull(values[7], "OldBalance"),
+                            Utils.convertStringToBigDecimalWithValidationNotNull(values[8], "newBalance")
                     ),
                     values[9].equals("1"),
                     values[10].equals("1")
@@ -110,10 +107,4 @@ public class TransactionIngester {
         }
     }
 
-    private BigDecimal convertStringToBigDecimalWithValidationNotNull(String strValue, String fieldName) {
-        if (strValue == null || strValue.isEmpty()) {
-            throw new IllegalArgumentException(fieldName + " shoud not be empty");
-        }
-        return new BigDecimal(strValue);
-    }
 }
