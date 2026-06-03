@@ -10,4 +10,6 @@ public interface TransactionRepository {
     Optional<Transaction> findByClientName(String clientName, Integer size, String[] dataLines);
 
     Optional<Transaction> findByClientName(String clientName, String[] dataLines);
+
+    void save(Transaction transaction);
 }

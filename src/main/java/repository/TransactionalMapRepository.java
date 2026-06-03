@@ -25,4 +25,9 @@ public class TransactionalMapRepository implements TransactionRepository{
     public Optional<Transaction> findByClientName(String clientName, String[] dataLines) {
         return findByClientName(clientName, dataLines.length - 1, dataLines);
     }
+
+    @Override
+    public void save(Transaction transaction) {
+
+    }
 }

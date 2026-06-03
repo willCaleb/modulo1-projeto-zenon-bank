@@ -23,4 +23,9 @@ public class TransactionListRepository implements TransactionRepository {
         return findByClientName(clientName, dataLines.length - 1, dataLines);
     }
 
+    @Override
+    public void save(Transaction transaction) {
+
+    }
+
 }
