@@ -3,11 +3,15 @@ package repository;
 import model.Transaction;
 import service.TransactionIngester;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 public class TransactionalMapRepository implements TransactionRepository{
+    @Override
+    public void saveAll(List<Transaction> transactions) {
 
+    }
 
     @Override
     public Optional<Transaction> findByClientName(String clientName, Integer size, String[] lines) {

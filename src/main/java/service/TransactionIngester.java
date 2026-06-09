@@ -20,7 +20,7 @@ public class TransactionIngester {
     private static final Integer BUFFER_ALLOCATION_SIZE = 8192;
 
     public List<Transaction> getTransactionsListFromFile(String[] lines){
-        return getTransactionsListFromFile(lines.length, lines);
+        return getTransactionsListFromFile(lines.length - 1, lines);
     }
 
     public List<Transaction> getTransactionsListFromFile(Integer linesToProcess, String[] lines) {

@@ -20,20 +20,16 @@ public class DbMain {
 
          TransactionRepository sqlRepository = new TransactionSQLRepository();
 
-
-
-
          long init = System.currentTimeMillis();
-         transactions.forEach(sqlRepository::save);
+//         transactions.forEach(sqlRepository::save);
+         sqlRepository.saveAll(transactions);
          long end = System.currentTimeMillis();
 
          System.out.println("Tempo total para salvar " + linesToProcess + " foi de " + (end - init));
 
          Optional<Transaction> optionalTransaction = sqlRepository.findByClientName("C1231006815", 0, null);
 
-         if(optionalTransaction.isPresent()){
-             System.out.println(optionalTransaction.get());
-         }
+         optionalTransaction.ifPresent(System.out::println);
     }
 
 }

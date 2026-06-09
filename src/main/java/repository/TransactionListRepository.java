@@ -28,4 +28,9 @@ public class TransactionListRepository implements TransactionRepository {
 
     }
 
+    @Override
+    public void saveAll(List<Transaction> transactions) {
+
+    }
+
 }
